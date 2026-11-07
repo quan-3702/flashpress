@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FlashPress - Flashcard Maker &amp; Study</title>
+  <meta name="description" content="Make flashcards, study them with smart review that shows each card right before you forget it, and print real two-sided cards. Works offline, no account, no subscription.">
+  <meta name="theme-color" content="#0e7490">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><img src="icon-192.png" alt="" width="30" height="30"><span>FlashPress</span></div>
+    <nav class="tabs" id="tabs">
+      <button data-v="cards" class="on">✏️ Cards</button>
+      <button data-v="study">🧠 Study</button>
+      <button data-v="print">🖨 Print</button>
+    </nav>
+    <span class="spacer"></span>
+    <div class="top-btns">
+      <button id="moreBtn" class="tb">☰ More</button>
+      <button id="proBtn" class="pro-btn">★ Get Pro</button>
+    </div>
+    <div id="menu" class="menu" hidden>
+      <button id="importBtn">📥 Add many cards at once (paste or CSV)…</button>
+      <button id="csvOut">📊 Save this deck as CSV (Excel)</button>
+      <hr>
+      <button id="saveBtn">💾 Save a backup of all decks (file)</button>
+      <button id="openBtn">📂 Open a backup…</button>
+      <button id="resetBtn">↺ Start this deck’s learning over…</button>
+      <hr>
+      <a href="help.html" target="_blank" rel="noopener">❓ How to use FlashPress</a>
+      <a href="mailto:thequan03072002@gmail.com?subject=FlashPress%20feedback">✉ Feedback &amp; support</a>
+      <a href="https://apps.microsoft.com/detail/9NDCRGD5QFJ4" target="_blank" rel="noopener">More apps: RecipePress – family cookbook</a>
+      <a href="https://apps.microsoft.com/detail/9PMB9K33JH3K" target="_blank" rel="noopener">More apps: MenuPress – menu maker</a>
+    </div>
+    <input id="openIn" type="file" accept=".json,application/json" hidden>
+    <input id="csvIn" type="file" accept=".csv,.txt,.tsv,text/csv,text/plain" hidden>
+    <input id="imgIn" type="file" accept="image/*" hidden>
+  </header>
+
+  <main class="layout">
+    <aside class="left">
+      <section class="tool">
+        <div class="row"><h2>📚 Decks</h2><span id="deckCount" class="muted"></span></div>
+        <div id="deckList" class="decks"></div>
+        <button id="addDeck" class="ghost small">＋ New deck</button>
+      </section>
+      <section class="tool">
+        <h2>⚙️ This deck</h2>
+        <label class="field">Name<input id="deckName" type="text" maxlength="60"></label>
+        <div class="two">
+          <label class="field">Front side is<input id="frontLabel" type="text" maxlength="30" placeholder="Question"></label>
+          <label class="field">Back side is<input id="backLabel" type="text" maxlength="30" placeholder="Answer"></label>
+        </div>
+        <div class="two">
+          <label class="field">Read aloud – front<select id="langF"></select></label>
+          <label class="field">Read aloud – back<select id="langB"></select></label>
+        </div>
+        <label class="field">New cards a day<input id="newPerDay" type="number" min="1" max="500"></label>
+        <button id="delDeck" class="ghost small danger">🗑 Delete this deck…</button>
+      </section>
+      <section class="tool stats" id="stats"></section>
+      <p class="promise">🔒 Works on this PC, offline – nothing is uploaded.<br>💳 Pay once for Pro – no subscription.</p>
+      <p class="fb-note">💬 Something not working the way you want? Tell me – <a href="mailto:thequan03072002@gmail.com?subject=FlashPress%20feedback">thequan03072002@gmail.com</a>. I read every message and improve the app.</p>
+    </aside>
+
+    <section class="stage">
+      <!-- CARDS -->
+      <div id="vCards" class="view">
+        <div class="bar"><input id="search" type="search" placeholder="🔍 Find a card…"><span id="cardCount" class="muted"></span><span class="spacer"></span><button id="addCard" class="primary">＋ Add a card</button></div>
+        <div id="cardList" class="cards"></div>
+        <p id="limitNote" class="hint warn"></p>
+      </div>
+      <!-- STUDY -->
+      <div id="vStudy" class="view" hidden>
+        <div class="bar"><span id="dueLine" class="muted"></span><span class="spacer"></span>
+          <label class="check"><input id="typeMode" type="checkbox"> Type the answer</label>
+          <label class="check"><input id="reverse" type="checkbox"> Back first</label>
+          <label class="check"><input id="autoSpeak" type="checkbox"> Read aloud</label>
+        </div>
+        <div id="studyBox" class="study"></div>
+      </div>
+      <!-- PRINT -->
+      <div id="vPrint" class="view" hidden>
+        <div class="bar wrap">
+          <label class="field inline">Cards<select id="pLayout">
+            <option value="8">8 per page (2 × 4)</option>
+            <option value="10">10 per page – business-card size</option>
+            <option value="4">4 per page – big cards</option>
+            <option value="fold">Fold in the middle (one-sided printer)</option>
+            <option value="i35">Index cards 3 × 5 in ★</option>
+            <option value="i46">Index cards 4 × 6 in ★</option>
+          </select></label>
+          <label class="field inline">Paper<select id="pPaper"><option value="letter">US Letter</option><option value="a4">A4</option></select></label>
+          <label class="field inline">Flip on<select id="pFlip"><option value="long">long edge</option><option value="short">short edge</option></select></label>
+          <span class="spacer"></span>
+          <button id="printBtn" class="primary">🖨 Print cards</button>
+        </div>
+        <p class="hint" id="printHint"></p>
+        <div id="preview" class="preview"></div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="importDialog" class="dlg wide">
+    <h2>Add many cards at once</h2>
+    <p class="muted">One card per line: <code>front | back</code>. Tabs work too – copy two columns from Excel, Google Sheets or a Quizlet export and paste them here.</p>
+    <textarea id="importText" rows="12" spellcheck="false" placeholder="der Hund | the dog&#10;die Katze | the cat"></textarea>
+    <div class="row-btns"><button id="importOk" class="primary">✓ Add cards</button><button id="importFile" class="ghost">📂 From a CSV file…</button><button id="importCancel" class="ghost">Cancel</button></div>
+  </dialog>
+
+  <dialog id="proDialog" class="dlg">
+    <h2>FlashPress Pro</h2>
+    <p class="muted">One-time purchase. Yours forever on this Microsoft account. No subscription, ever.</p>
+    <ul class="pro-list">
+      <li><strong>Unlimited decks and cards</strong> – the free version has 3 decks with up to 50 cards each</li>
+      <li><strong>Pictures on your cards</strong> – maps, diagrams, words with a picture</li>
+      <li><strong>Index cards 3 × 5 and 4 × 6</strong> printing</li>
+      <li><strong>No “Made with FlashPress” line</strong> on printed cards</li>
+    </ul>
+    <p class="fb-note">💬 Something not working the way you want? Tell me – <a href="mailto:thequan03072002@gmail.com?subject=FlashPress%20feedback">thequan03072002@gmail.com</a>. I read every message and improve the app.</p>
+    <p id="proMsg" class="pro-msg" hidden></p>
+    <div class="row-btns">
+      <button id="buyBtn" class="primary" autofocus>Unlock Pro</button>
+      <button id="restoreBtn" class="ghost">Restore purchase</button>
+      <button id="closePro" class="ghost">Not now</button>
+    </div>
+  </dialog>
+  <div id="toast" class="toast" hidden></div>
+  <div id="restartBar" class="restart" hidden>A new version of FlashPress is ready. <button id="restartBtn" class="primary">Restart now</button></div>
+  <div id="printArea"></div>
+  <script src="app.js"></script>
+</body>
+</html>
